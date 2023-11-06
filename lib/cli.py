@@ -1,20 +1,15 @@
 # lib/cli.py
 
-from helpers import (
-    exit_program,
-    helper_1
-)
+from helpers import (exit_program)
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
-# Create the database engine
 engine = create_engine('sqlite:///bourbon_collection.db')
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
 session = Session()
 
-# Define the Collection model class
 class Collection(Base):
     __tablename__ = 'collections'
     id = Column(Integer, primary_key=True)
@@ -37,7 +32,6 @@ class Collection(Base):
     def find_by_id(collection_id):
         return session.query(Collection).filter_by(id=collection_id).first()
 
-# Define the Bourbon model class
 class Bourbon(Base):
     __tablename__ = 'bourbons'
     id = Column(Integer, primary_key=True)
@@ -61,10 +55,10 @@ class Bourbon(Base):
     def find_by_id(bourbon_id):
         return session.query(Bourbon).filter_by(id=bourbon_id).first()
 
-# Create the database tables
+
 Base.metadata.create_all(engine)
 
-# CLI interface
+
 def display_menu():
     print("1. Create Collection")
     print("2. Delete Collection")
@@ -138,21 +132,25 @@ def view_bourbons_in_collection():
 
 def create_bourbon():
     name = input("Enter the name of the bourbon: ")
-    collections = Collection.get_all()
-    if collections:
-        print("Select a collection to add the bourbon to:")
-        for collection in collections:
-            print(f"ID: {collection.id}, Name: {collection.name}")
-        collection_id = int(input("Enter the ID of the collection: "))
-        collection = next((c for c in collections if c.id == collection_id), None)
-        if collection:
-            bourbon = Bourbon(name=name, collection=collection)
-            bourbon.create()
-            print("Bourbon created successfully!")
+    if isinstance(name, str):
+        collections = Collection.get_all()
+        if collections:
+            print("Select a collection to add the bourbon to:")
+            for collection in collections:
+                print(f"ID: {collection.id}, Name: {collection.name}")
+            collection_id = int(input("Enter the ID of the collection: "))
+            collection = next((c for c in collections if c.id == collection_id), None)
+            if collection:
+                bourbon = Bourbon(name=name, collection=collection)
+                bourbon.create()
+                print("Bourbon created successfully!")
+            else:
+                print("Collection not found.")
         else:
-            print("Collection not found.")
+            print("No collections found.")
     else:
-        print("No collections found.")
+        print("Name must be a string.")
+
         
 def add_bourbon_to_collection():
     bourbons = Bourbon.get_all()
