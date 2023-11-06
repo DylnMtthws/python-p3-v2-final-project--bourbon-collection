@@ -26,7 +26,7 @@ class Collection(Base):
         session.commit()
 
     def delete(self):
-        session.delete(self)x
+        session.delete(self)
         session.commit()
 
     @staticmethod
@@ -70,8 +70,8 @@ def display_menu():
     print("2. Delete Collection")
     print("3. Display All Collections")
     print("4. View Bourbons in Collection")
-    print("5. Find Collection by Name")
-    print("6. Create Bourbon")
+    print("5. Create Bourbon")
+    print("6. Add Bourbon to a Collection")
     print("7. Delete Bourbon")
     print("8. Display All Bourbons")
     print("9. Find Bourbon by Name")
@@ -84,13 +84,20 @@ def create_collection():
     print("Collection created successfully!")
 
 def delete_collection():
-    collection_id = int(input("Enter the ID of the collection to delete: "))
-    collection = Collection.find_by_id(collection_id)
-    if collection:
-        collection.delete()
-        print("Collection deleted successfully!")
+    collections = Collection.get_all()
+    if collections:
+        print("Select a collection to delete:")
+        for collection in collections:
+            print(f"ID: {collection.id}, Name: {collection.name}")
+        collection_id = int(input("Enter the ID of the collection to delete: "))
+        collection = next((c for c in collections if c.id == collection_id), None)
+        if collection:
+            collection.delete()
+            print("Collection deleted successfully!")
+        else:
+            print("Collection not found.")
     else:
-        print("Collection not found.")
+        print("No collections found.")
 
 def display_all_collections():
     collections = Collection.get_all()
@@ -101,46 +108,99 @@ def display_all_collections():
         print("No collections found.")
 
 def view_bourbons_in_collection():
-    collection_id = int(input("Enter the ID of the collection: "))
-    collection = Collection.find_by_id(collection_id)
-    if collection:
-        bourbons = collection.bourbons
-        if bourbons:
-            for bourbon in bourbons:
-                print(f"ID: {bourbon.id}, Name: {bourbon.name}")
-        else:
-            print("No bourbons found in this collection.")
-    else:
-        print("Collection not found.")
-
-def find_collection_by_name():
-    name = input("Enter the name of the collection: ")
-    collections = session.query(Collection).filter_by(name=name).all()
+    collections = Collection.get_all()
     if collections:
+        print("Select a collection:")
         for collection in collections:
             print(f"ID: {collection.id}, Name: {collection.name}")
+        collection_id = int(input("Enter the ID of the collection: "))
+        collection = next((c for c in collections if c.id == collection_id), None)
+        if collection:
+            bourbons = collection.bourbons
+            if bourbons:
+                for bourbon in bourbons:
+                    print(f"ID: {bourbon.id}, Name: {bourbon.name}")
+            else:
+                print("No bourbons found in this collection.")
+        else:
+            print("Collection not found.")
     else:
-        print("Collection not found.")
+        print("No collections found.")
+
+# def find_collection_by_name():
+#     name = input("Enter the name of the collection: ")
+#     collections = session.query(Collection).filter_by(name=name).all()
+#     if collections:
+#         for collection in collections:
+#             print(f"ID: {collection.id}, Name: {collection.name}")
+#     else:
+#         print("Collection not found.")
 
 def create_bourbon():
     name = input("Enter the name of the bourbon: ")
-    collection_id = int(input("Enter the ID of the collection: "))
-    collection = Collection.find_by_id(collection_id)
-    if collection:
-        bourbon = Bourbon(name=name, collection=collection)
-        bourbon.create()
-        print("Bourbon created successfully!")
+    collections = Collection.get_all()
+    if collections:
+        print("Select a collection to add the bourbon to:")
+        for collection in collections:
+            print(f"ID: {collection.id}, Name: {collection.name}")
+        collection_id = int(input("Enter the ID of the collection: "))
+        collection = next((c for c in collections if c.id == collection_id), None)
+        if collection:
+            bourbon = Bourbon(name=name, collection=collection)
+            bourbon.create()
+            print("Bourbon created successfully!")
+        else:
+            print("Collection not found.")
     else:
-        print("Collection not found.")
+        print("No collections found.")
+        
+def add_bourbon_to_collection():
+    bourbons = Bourbon.get_all()
+    if bourbons:
+        print("Select a bourbon:")
+        for bourbon in bourbons:
+            print(f"ID: {bourbon.id}, Name: {bourbon.name}")
+        bourbon_id = int(input("Enter the ID of the bourbon: "))
+        bourbon = next((b for b in bourbons if b.id == bourbon_id), None)
+        if bourbon:
+            collections = Collection.get_all()
+            if collections:
+                print("Select a collection:")
+                for collection in collections:
+                    print(f"ID: {collection.id}, Name: {collection.name}")
+                collection_id = int(input("Enter the ID of the collection: "))
+                collection = next((c for c in collections if c.id == collection_id), None)
+                if collection:
+                    collection.bourbons.append(bourbon)
+                    session.commit()
+                    print("Bourbon added to collection successfully!")
+                else:
+                    print("Collection not found.")
+            else:
+                print("No collections found.")
+        else:
+            print("Bourbon not found.")
+    else:
+        print("No bourbons found.")
+
+
 
 def delete_bourbon():
-    bourbon_id = int(input("Enter the ID of the bourbon to delete: "))
-    bourbon = Bourbon.find_by_id(bourbon_id)
-    if bourbon:
-        bourbon.delete()
-        print("Bourbon deleted successfully!")
+    bourbons = Bourbon.get_all()
+    if bourbons:
+        print("Select a bourbon to delete:")
+        for bourbon in bourbons:
+            print(f"ID: {bourbon.id}, Name: {bourbon.name}")
+        bourbon_id = int(input("Enter the ID of the bourbon to delete: "))
+        bourbon = next((b for b in bourbons if b.id == bourbon_id), None)
+        if bourbon:
+            bourbon.delete()
+            print("Bourbon deleted successfully!")
+        else:
+            print("Bourbon not found.")
     else:
-        print("Bourbon not found.")
+        print("No bourbons found.")
+
 
 def display_all_bourbons():
     bourbons = Bourbon.get_all()
@@ -172,9 +232,9 @@ def main():
         elif choice == '4':
             view_bourbons_in_collection()
         elif choice == '5':
-            find_collection_by_name()
-        elif choice == '6':
             create_bourbon()
+        elif choice == '6':
+            add_bourbon_to_collection()
         elif choice == '7':
             delete_bourbon()
         elif choice == '8':
