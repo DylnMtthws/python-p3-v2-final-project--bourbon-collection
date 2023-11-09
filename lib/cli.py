@@ -4,6 +4,8 @@ from helpers import (exit_program)
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
+from termcolor import colored, cprint
+
 
 engine = create_engine('sqlite:///bourbon_collection.db')
 Base = declarative_base()
@@ -60,167 +62,217 @@ Base.metadata.create_all(engine)
 
 
 def display_menu():
-    print("1. Create Collection")
-    print("2. Delete Collection")
-    print("3. Display All Collections")
-    print("4. View Bourbons in Collection")
-    print("5. Create Bourbon")
-    print("6. Add Bourbon to a Collection")
-    print("7. Delete Bourbon")
-    print("8. Display All Bourbons")
-    print("9. Find Bourbon by Name")
-    print("0. Exit")
+    cprint("\nPlease choose an option:", 'white', attrs=['bold'])
+    print(colored("1. Create Collection", 'blue'))
+    print(colored("2. Delete Collection", 'white'))
+    print(colored("3. Display All Collections", 'blue'))
+    print(colored("4. View Bourbons in Collection", 'white'))
+    print(colored("5. Create Bourbon", 'blue'))
+    print(colored("6. Add Bourbon to a Collection", 'white'))
+    print(colored("7. Delete Bourbon", 'blue'))
+    print(colored("8. Display All Bourbons", 'white'))
+    print(colored("9. Remove Bourbon from Collection", 'blue'))
+    print(colored("0. Exit", 'white'))
+
 
 def create_collection():
-    name = input("Enter the name of the collection: ")
+    cprint("\n--- Create a New Collection ---", 'blue', attrs=['bold'])
+    name = input("\nWhat's the name of your new collection? ")
     collection = Collection(name=name)
     collection.create()
-    print("Collection created successfully!")
+    cprint("\nCollection created successfully!", 'green')
+
 
 def delete_collection():
     collections = Collection.get_all()
     if collections:
-        print("Select a collection to delete:")
+        print("\nSelect a collection to delete:")
         for collection in collections:
-            print(f"ID: {collection.id}, Name: {collection.name}")
-        collection_id = int(input("Enter the ID of the collection to delete: "))
+            print(f"\nID: {collection.id}, Name: {collection.name}")
+        collection_id = int(input("\nEnter the ID of the collection to delete: "))
         collection = next((c for c in collections if c.id == collection_id), None)
         if collection:
             collection.delete()
-            print("Collection deleted successfully!")
+            cprint("\nCollection deleted successfully!", 'green')
         else:
-            print("Collection not found.")
+            cprint("\nCollection not found.", 'red')
     else:
-        print("No collections found.")
+        cprint("\nNo Collections found.", 'red')
 
 def display_all_collections():
     collections = Collection.get_all()
     if collections:
+        cprint("\n--- All Collections ---", 'blue', attrs=['bold'])
         for collection in collections:
-            print(f"ID: {collection.id}, Name: {collection.name}")
+            print(f"\nID: {collection.id}, Name: {collection.name}")
     else:
-        print("No collections found.")
+        cprint("\nNo Collections found.", 'red')
+
 
 def view_bourbons_in_collection():
     collections = Collection.get_all()
     if collections:
-        print("Select a collection:")
+        cprint("\n--- Select a Collection ---", 'blue', attrs=['bold'])
         for collection in collections:
-            print(f"ID: {collection.id}, Name: {collection.name}")
-        collection_id = int(input("Enter the ID of the collection: "))
+            print(f"\nID: {collection.id}, Name: {collection.name}")
+        collection_id = int(input("\nEnter the ID of the collection: "))
         collection = next((c for c in collections if c.id == collection_id), None)
         if collection:
             bourbons = collection.bourbons
             if bourbons:
                 for bourbon in bourbons:
-                    print(f"ID: {bourbon.id}, Name: {bourbon.name}")
+                    print(f"\nID: {bourbon.id}, Name: {bourbon.name}")
             else:
-                print("No bourbons found in this collection.")
+                cprint("\nNo Bourbons found in this collection.", 'red')
         else:
-            print("Collection not found.")
+            cprint("\nCollection not found.", 'red')
     else:
-        print("No collections found.")
-
-# def find_collection_by_name():
-#     name = input("Enter the name of the collection: ")
-#     collections = session.query(Collection).filter_by(name=name).all()
-#     if collections:
-#         for collection in collections:
-#             print(f"ID: {collection.id}, Name: {collection.name}")
-#     else:
-#         print("Collection not found.")
+        cprint("\nNo Collections found.", 'red')
 
 def create_bourbon():
-    name = input("Enter the name of the bourbon: ")
+    name = input("\nEnter the name of the bourbon: ")
     if isinstance(name, str):
         collections = Collection.get_all()
         if collections:
-            print("Select a collection to add the bourbon to:")
+            print("\nSelect a collection to add the bourbon to:")
             for collection in collections:
-                print(f"ID: {collection.id}, Name: {collection.name}")
-            collection_id = int(input("Enter the ID of the collection: "))
+                print(f"\nID: {collection.id}, Name: {collection.name}")
+            collection_id = int(input("\nEnter the ID of the collection: "))
             collection = next((c for c in collections if c.id == collection_id), None)
             if collection:
                 bourbon = Bourbon(name=name, collection=collection)
                 bourbon.create()
-                print("Bourbon created successfully!")
+                cprint("\nBourbon created successfully!", 'green')
             else:
-                print("Collection not found.")
-        else:
-            print("No collections found.")
-    else:
-        print("Name must be a string.")
+                cprint("\nCollection not found.", 'red')
 
-        
+
 def add_bourbon_to_collection():
     bourbons = Bourbon.get_all()
     if bourbons:
-        print("Select a bourbon:")
+        cprint("\n--- Select a Bourbon ---", 'blue', attrs=['bold'])
         for bourbon in bourbons:
-            print(f"ID: {bourbon.id}, Name: {bourbon.name}")
-        bourbon_id = int(input("Enter the ID of the bourbon: "))
+            print(f"\nID: {bourbon.id}, Name: {bourbon.name}")
+        bourbon_id = int(input("\nEnter the ID of the bourbon: "))
         bourbon = next((b for b in bourbons if b.id == bourbon_id), None)
         if bourbon:
             collections = Collection.get_all()
             if collections:
-                print("Select a collection:")
+                print("\nSelect a collection:")
                 for collection in collections:
-                    print(f"ID: {collection.id}, Name: {collection.name}")
-                collection_id = int(input("Enter the ID of the collection: "))
+                    print(f"\nID: {collection.id}, Name: {collection.name}")
+                collection_id = int(input("\nEnter the ID of the collection: "))
                 collection = next((c for c in collections if c.id == collection_id), None)
                 if collection:
                     collection.bourbons.append(bourbon)
                     session.commit()
-                    print("Bourbon added to collection successfully!")
+                    cprint("\nBourbon added to collection successfully!", 'green')
                 else:
-                    print("Collection not found.")
+                    cprint("\nCollection not found.", 'red')
             else:
-                print("No collections found.")
+                cprint("\nNo Collections found.", 'red')
         else:
-            print("Bourbon not found.")
+            cprint("\nBourbon not found.", 'red')
     else:
-        print("No bourbons found.")
-
-
+        cprint("\nNo Bourbons found.", 'red')
 
 def delete_bourbon():
     bourbons = Bourbon.get_all()
     if bourbons:
-        print("Select a bourbon to delete:")
+        cprint("\n--- Select a Bourbon to Delete ---", 'blue', attrs=['bold'])
         for bourbon in bourbons:
-            print(f"ID: {bourbon.id}, Name: {bourbon.name}")
-        bourbon_id = int(input("Enter the ID of the bourbon to delete: "))
+            print(f"\nID: {bourbon.id}, Name: {bourbon.name}")
+        bourbon_id = int(input("\nEnter the ID of the bourbon to delete: "))
         bourbon = next((b for b in bourbons if b.id == bourbon_id), None)
         if bourbon:
             bourbon.delete()
-            print("Bourbon deleted successfully!")
+            cprint("\nCollection deleted successfully!", 'green')
         else:
-            print("Bourbon not found.")
+            cprint("\nBourbon not found.", 'red')
     else:
-        print("No bourbons found.")
-
+        cprint("\nNo Bourbons found.", 'red')
 
 def display_all_bourbons():
     bourbons = Bourbon.get_all()
     if bourbons:
         for bourbon in bourbons:
-            print(f"ID: {bourbon.id}, Name: {bourbon.name}")
+            print(f"\nID: {bourbon.id}, Name: {bourbon.name}")
     else:
-        print("No bourbons found.")
+        cprint("\nNo Bourbons found.", 'red')
+        
+def remove_bourbon_from_collection():
+    collections = Collection.get_all()
+    if collections:
+        cprint("\n ---Select a Collection---", 'blue', attrs=['bold'])
+        for collection in collections:
+            print(f"\nID: {collection.id}, Name: {collection.name}")
+        collection_id = int(input("\nEnter the ID of the collection: "))
+        collection = next((c for c in collections if c.id == collection_id), None)
+        if collection:
+            bourbons = collection.bourbons
+            if bourbons:
+                cprint("\n--- Select a Bourbon ---", 'blue', attrs=['bold'])
+                for bourbon in bourbons:
+                    print(f"\nID: {bourbon.id}, Name: {bourbon.name}")
+                bourbon_id = int(input("\nEnter the ID of the bourbon to remove: "))
+                bourbon = next((b for b in bourbons if b.id == bourbon_id), None)
+                if bourbon:
+                    collection.bourbons.remove(bourbon)
+                    session.commit()
+                    cprint("\Bourbon removed from collection successfully!", 'green')
+                else:
+                    cprint("\nBourbon not found.", 'red')
+            else:
+                cprint("\nNo Bourbons found in this Collection.", 'red')
+        else:
+            cprint("\nCollection not found.", 'red')
+    else:
+        cprint("\nNo Collections found.", 'red')
 
-def find_bourbon_by_name():
-    name = input("Enter the name of the bourbon: ")
-    bourbons = session.query(Bourbon).filter_by(name=name).all()
-    if bourbons:
-        for bourbon in bourbons:
-            print(f"ID: {bourbon.id}, Name: {bourbon.name}")
-    else:
-        print("Bourbon not found.")
+
 
 def main():
+    print("""
+          
+                                                              
+        ████████                                    
+        ████████                                    
+        ████████                                    
+        ████████                                  
+        ████████                                    
+        ████████                                    
+        ████████                                    
+        ▒▒▒▒▒▒▓▓                                    
+        ▒▒▒▒▒▒▒▒                                    
+       ▒▒▒▒▒▒▒▒░░                              
+       ▒▒▒▒▒▒▒▒▒▒                                    
+     ▒▒▒▒▒▒▒▒▒▒▒▒▒▒                                  
+  ░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒                                
+  ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒                              
+  ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░                            
+▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+████████████████████░░░░                        ░░░░
+████████████████████░░░░                        ░░░░
+████████████████████░░░░                        ░░░░
+████████████████████░░░░                        ░░░░
+██████████████████████░░░░  ░░░░░░░░  ░░░░      ░░░░
+██████████████████████░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░░░░
+██████████████████████░░░░▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▒▒░░  
+██████████████████████░░░░▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▒▒░░  
+██████████████████████░░░░▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▒▒▒▒░░  
+██████████████████████░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░  
+██████████████████████░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░  
+██████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░  
+▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░░░░░░░░░░░░░░░░░░░░░░  
+▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░░░░░░░░░░░░░░░░░░░░░░  
+▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░░░░░░░░░░░░░░░░░░░░    
+
+
+""")
     while True:
         display_menu()
-        choice = input("Enter your choice: ")
+        choice = input("\nEnter your choice: ")
         if choice == '1':
             create_collection()
         elif choice == '2':
@@ -238,15 +290,44 @@ def main():
         elif choice == '8':
             display_all_bourbons()
         elif choice == '9':
-            find_bourbon_by_name()
+            remove_bourbon_from_collection()
         elif choice == "0":
+            print("""
+                                      ██▓▓▓▓░░                                      
+                                      ██▓▓▓▓░░                                      
+                                      ██▓▓▓▓░░                                      
+                                      ██▓▓▓▓░░                                      
+                                      ██▓▓▓▓░░                                      
+                                      ██▓▓▓▓░░                                      
+                                      ██▓▓▓▓░░                                      
+                                      ▓▓░░░░▒▒                                      
+                                      ▓▓░░░░▒▒                                      
+                                      ▒▒░░░░▒▒                                      
+                                    ▓▓▒▒▒▒▒▒▒▒▒▒                                    
+                                ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▒▒                                
+                                ▒▒▒▒░░░░░░░░░░░░░░░░                                
+                                ▒▒▒▒░░░░░░░░░░░░░░░░                                
+                                ██▓▓▒▒▓▓▓▓▓▓▓▓▒▒▓▓░░                                
+                                ██▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░                                
+                                ██▓▓▓▓        ▓▓▓▓░░                                
+                                ██▓▓  ▓▓▓▓▓▓▓▓  ▓▓░░                                
+                                ██▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░                                
+                                ██▓▓▓▓        ▓▓▓▓░░                                
+                                ██▓▓▓▓        ▓▓▓▓░░                                
+                                ██▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░                                
+                                ██▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░                                
+                                ██▓▓            ▓▓░░                                
+                                ██▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░                                
+                                ██▓▓            ▓▓░░                                
+                                ██▓▓██▓▓▓▓▓▓▓▓▓▓▓▓░░                                
+                                ██▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░                                
+                                ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░                                
+                                ▒▒░░░░░░░░░░░░░░░░░░                                
+                                ▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░                                
+                  """)
             exit_program()
         else:
-            print("Invalid choice. Please try again.")
+            print("\nInvalid choice. Please try again.")
 
 if __name__ == '__main__':
     main()
-
-
-  
- 
